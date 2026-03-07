@@ -16,6 +16,12 @@ export const GET = withAuth(async (req: Request) => {
 
         const searchTerm = searchParams.get('search') || '';
         const resultFilter = searchParams.get('result') || 'All';
+        const startDate = searchParams.get('startDate');
+        const endDate = searchParams.get('endDate');
+        const employeeId = searchParams.get('employee_id');
+        const courseId = searchParams.get('course_id');
+        const trainerName = searchParams.get('trainer');
+        const location = searchParams.get('location');
 
         const where: any = {
             AND: [
@@ -26,7 +32,13 @@ export const GET = withAuth(async (req: Request) => {
                         { course: { course_name: { contains: searchTerm } } },
                     ]
                 } : {},
-                resultFilter !== 'All' ? { training_result: resultFilter } : {},
+                resultFilter && resultFilter !== 'All' ? { training_result: resultFilter } : {},
+                startDate ? { training_date: { gte: new Date(startDate) } } : {},
+                endDate ? { training_date: { lte: new Date(endDate) } } : {},
+                employeeId ? { employee_id: parseInt(employeeId) } : {},
+                courseId ? { course_id: parseInt(courseId) } : {},
+                trainerName ? { trainer_name: { contains: trainerName } } : {},
+                location ? { location: { contains: location } } : {},
             ]
         };
 

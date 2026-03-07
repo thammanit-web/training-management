@@ -20,6 +20,8 @@ export default async function EmployeesPage({
     const searchTerm = params.search || '';
     const deptFilter = params.dept || 'All';
     const statusFilter = params.status || 'All';
+    const startDate = params.startDate || '';
+    const endDate = params.endDate || '';
     const sortField = params.sort || 'id';
     const sortOrder = params.dir || 'desc';
 
@@ -35,6 +37,8 @@ export default async function EmployeesPage({
             } : {},
             deptFilter !== 'All' ? { department: deptFilter } : {},
             statusFilter !== 'All' ? { status: statusFilter } : {},
+            startDate ? { start_date: { gte: new Date(startDate) } } : {},
+            endDate ? { start_date: { lte: new Date(endDate) } } : {},
         ]
     };
 
@@ -66,6 +70,8 @@ export default async function EmployeesPage({
             currentSearch={searchTerm}
             currentDept={deptFilter}
             currentStatus={statusFilter}
+            currentStartDate={startDate}
+            currentEndDate={endDate}
             currentSort={{ key: sortField, direction: sortOrder }}
         />
     );

@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ExportCoursesModal } from "./ExportCoursesModal";
 import { exportCoursesToExcel } from "@/lib/exportUtils";
 
 interface CoursesClientProps {
@@ -34,6 +35,7 @@ export default function CoursesClient({
     const router = useRouter();
     const searchParams = useSearchParams();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [editingCourse, setEditingCourse] = useState<any>(null);
     const [searchTerm, setSearchTerm] = useState(currentSearch);
 
@@ -111,23 +113,8 @@ export default function CoursesClient({
         }
     };
 
-    const handleExport = async () => {
-        try {
-            const params = new URLSearchParams({
-                limit: 'all',
-                search: currentSearch,
-                cat: currentCat
-            });
-            const res = await fetch(`/api/courses?${params.toString()}`);
-            if (res.ok) {
-                const { data } = await res.json();
-                exportCoursesToExcel(data);
-            } else {
-                alert("ไม่สามารถดึงข้อมูลสำหรับ Export ได้");
-            }
-        } catch (error) {
-            console.error("Export error", error);
-        }
+    const handleExport = () => {
+        setIsExportModalOpen(true);
     };
 
     const handleOpenModal = (course?: any) => {
@@ -247,6 +234,8 @@ export default function CoursesClient({
                     </div>
                 </form>
             </Modal>
+
+            <ExportCoursesModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} categories={categories} />
         </div>
     );
 }

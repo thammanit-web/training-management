@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Card } from "@/components/ui/Card";
 import { EmployeeTrainingRecordsModal } from "./EmployeeTrainingRecordsModal";
+import { ExportEmployeesModal } from "./ExportEmployeesModal";
 import { exportEmployeesToExcel } from "@/lib/exportUtils";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -20,6 +21,8 @@ interface EmployeesClientProps {
     currentSearch: string;
     currentDept: string;
     currentStatus: string;
+    currentStartDate: string;
+    currentEndDate: string;
     currentSort: { key: string; direction: 'asc' | 'desc' };
 }
 
@@ -32,12 +35,15 @@ export default function EmployeesClient({
     currentSearch,
     currentDept,
     currentStatus,
+    currentStartDate,
+    currentEndDate,
     currentSort
 }: EmployeesClientProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [editingEmployee, setEditingEmployee] = useState<any>(null);
     const [viewingEmployee, setViewingEmployee] = useState<any>(null);
     const [formData, setFormData] = useState({
@@ -61,7 +67,13 @@ export default function EmployeesClient({
         const params = new URLSearchParams(searchParams.toString());
 
         // Reset page if filtering changes
-        if (!updates.page && (updates.search !== undefined || updates.dept !== undefined || updates.status !== undefined)) {
+        if (!updates.page && (
+            updates.search !== undefined ||
+            updates.dept !== undefined ||
+            updates.status !== undefined ||
+            updates.startDate !== undefined ||
+            updates.endDate !== undefined
+        )) {
             params.set('page', '1');
         }
 
@@ -100,24 +112,8 @@ export default function EmployeesClient({
 
     const totalPages = Math.ceil(total / limit);
 
-    const handleExport = async () => {
-        try {
-            const params = new URLSearchParams({
-                limit: 'all',
-                search: currentSearch,
-                dept: currentDept,
-                status: currentStatus
-            });
-            const res = await fetch(`/api/employees?${params.toString()}`);
-            if (res.ok) {
-                const { data } = await res.json();
-                exportEmployeesToExcel(data);
-            } else {
-                alert("ไม่สามารถดึงข้อมูลสำหรับ Export ได้");
-            }
-        } catch (error) {
-            console.error("Export error", error);
-        }
+    const handleExport = () => {
+        setIsExportModalOpen(true);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -204,14 +200,17 @@ export default function EmployeesClient({
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl shadow-sm border border-secondary text-slate-800">
-                <div className="md:col-span-2">
-                    <Input
-                        placeholder="ค้นหาชื่อหรือรหัสพนักงาน..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="h-10"
-                    />
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 bg-white p-4 rounded-xl shadow-sm border border-secondary text-slate-800">
+                <div className="md:col-span-1">
+                    <Input placeholder="ค้นหา..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="h-10" />
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-accent whitespace-nowrap">เริ่ม:</span>
+                    <Input type="date" value={currentStartDate} onChange={(e) => updateFilters({ startDate: e.target.value })} className="h-9 py-1 text-sm" />
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-accent whitespace-nowrap">ถึง:</span>
+                    <Input type="date" value={currentEndDate} onChange={(e) => updateFilters({ endDate: e.target.value })} className="h-9 py-1 text-sm" />
                 </div>
                 <Select
                     value={currentDept}
@@ -295,10 +294,10 @@ export default function EmployeesClient({
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Input label="รหัสพนักงาน" name="employee_code" required value={formData.employee_code} onChange={(e) => setFormData({ ...formData, employee_code: e.target.value })} />
-                     
-                            <Input label="ชื่อ-นามสกุล (ไทย)" name="employee_name_th" required value={formData.employee_name_th} onChange={(e) => setFormData({ ...formData, employee_name_th: e.target.value })} />
-                            <Input label="ชื่อ-นามสกุล (English)" name="employee_name_en" value={formData.employee_name_en} onChange={(e) => setFormData({ ...formData, employee_name_en: e.target.value })} />
-                       
+
+                        <Input label="ชื่อ-นามสกุล (ไทย)" name="employee_name_th" required value={formData.employee_name_th} onChange={(e) => setFormData({ ...formData, employee_name_th: e.target.value })} />
+                        <Input label="ชื่อ-นามสกุล (English)" name="employee_name_en" value={formData.employee_name_en} onChange={(e) => setFormData({ ...formData, employee_name_en: e.target.value })} />
+
 
                         <Select
                             label="เพศ"
@@ -337,6 +336,7 @@ export default function EmployeesClient({
             </Modal>
 
             <EmployeeTrainingRecordsModal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} employee={viewingEmployee} />
+            <ExportEmployeesModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} departments={departments} />
         </div>
     );
 }

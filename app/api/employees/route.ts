@@ -14,6 +14,11 @@ export const GET = withAuth(async (req: Request) => {
         const searchTerm = searchParams.get('search') || '';
         const deptFilter = searchParams.get('dept') || 'All';
         const statusFilter = searchParams.get('status') || 'All';
+        const startDate = searchParams.get('startDate');
+        const endDate = searchParams.get('endDate');
+        const gender = searchParams.get('gender');
+        const workLocation = searchParams.get('workLocation');
+        const position = searchParams.get('position');
 
         const where: any = {
             AND: [
@@ -24,8 +29,13 @@ export const GET = withAuth(async (req: Request) => {
                         { employee_code: { contains: searchTerm } },
                     ]
                 } : {},
-                deptFilter !== 'All' ? { department: deptFilter } : {},
-                statusFilter !== 'All' ? { status: statusFilter } : {},
+                deptFilter && deptFilter !== 'All' ? { department: deptFilter } : {},
+                statusFilter && statusFilter !== 'All' ? { status: statusFilter } : {},
+                startDate ? { start_date: { gte: new Date(startDate) } } : {},
+                endDate ? { start_date: { lte: new Date(endDate) } } : {},
+                gender && gender !== 'All' ? { gender } : {},
+                workLocation && workLocation !== 'All' ? { work_location: workLocation } : {},
+                position && position !== 'All' ? { position } : {},
             ]
         };
 

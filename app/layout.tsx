@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
-import { Bai_Jamjuree } from "next/font/google";
+// 1. เปลี่ยนจาก next/font/google เป็น next/font/local
+import localFont from "next/font/local"; 
 import "./globals.css";
 
-const baiJamjuree = Bai_Jamjuree({
+// 2. กำหนดค่า localFont แทนที่ของเดิม
+const baiJamjuree = localFont({
+  src: [
+    {
+      path: "../public/fonts/BaiJamjuree-Light.ttf", // ตรวจสอบ Path ให้ถูกต้อง
+      weight: "300",
+      style: "normal",
+    },
+    // หากมีไฟล์ Weight อื่นๆ เช่น Bold สามารถเพิ่ม Object ลงใน Array นี้ได้เลย
+  ],
   variable: "--font-bai-jamjuree",
-  subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {

@@ -13,6 +13,8 @@ export const GET = withAuth(async (req: Request) => {
 
         const searchTerm = searchParams.get('search') || '';
         const categoryFilter = searchParams.get('cat') || 'All';
+        const trainingTypeFilter = searchParams.get('trainingType') || 'All';
+        const organizingAgencyFilter = searchParams.get('agency') || 'All';
 
         const where: any = {
             AND: [
@@ -22,7 +24,9 @@ export const GET = withAuth(async (req: Request) => {
                         { course_code: { contains: searchTerm } },
                     ]
                 } : {},
-                categoryFilter !== 'All' ? { course_category: categoryFilter } : {},
+                categoryFilter && categoryFilter !== 'All' ? { course_category: categoryFilter } : {},
+                trainingTypeFilter && trainingTypeFilter !== 'All' ? { training_type: trainingTypeFilter } : {},
+                organizingAgencyFilter && organizingAgencyFilter !== 'All' ? { organizing_agency: { contains: organizingAgencyFilter } } : {},
             ]
         };
 

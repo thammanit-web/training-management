@@ -45,13 +45,10 @@ export default function LoginPage() {
         <div className="flex h-screen items-center justify-center bg-background p-4">
             <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl border border-secondary">
                 <div className="mb-8 text-center text-primary">
-                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-10 h-10 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                        </svg>
+                    <div className="h-16    rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <img src="/logo/NDC-LOGO-04.png" alt="" className="h-16" />
                     </div>
-                    <h1 className="text-3xl font-extrabold tracking-tight">ระบบบริหารการอบรม</h1>
-                    <p className="text-accent mt-2 font-medium">กรุณาเข้าสู่ระบบด้วยบัญชีของคุณ</p>
+                    <h1 className="text-3xl font-extrabold tracking-tight">Training Management System</h1>
                 </div>
 
                 {error && (
@@ -67,7 +64,7 @@ export default function LoginPage() {
                         required
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="admin"
+                       placeholder="Username"
                     />
 
                     <Input
@@ -76,7 +73,7 @@ export default function LoginPage() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="admin"
+                        placeholder="Password"
                     />
 
                     <Button

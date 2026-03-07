@@ -19,6 +19,8 @@ export default async function TrainingRecordsPage({
 
     const searchTerm = params.search || '';
     const resultFilter = params.result || 'All';
+    const startDate = params.startDate || '';
+    const endDate = params.endDate || '';
     const sortField = params.sort || 'id';
     const sortOrder = params.dir || 'desc';
 
@@ -32,6 +34,8 @@ export default async function TrainingRecordsPage({
                 ]
             } : {},
             resultFilter !== 'All' ? { training_result: resultFilter } : {},
+            startDate ? { training_date: { gte: new Date(startDate) } } : {},
+            endDate ? { training_date: { lte: new Date(endDate) } } : {},
         ]
     };
 
@@ -82,6 +86,8 @@ export default async function TrainingRecordsPage({
             limit={limit}
             currentSearch={searchTerm}
             currentResult={resultFilter}
+            currentStartDate={startDate}
+            currentEndDate={endDate}
             currentSort={{ key: sortField, direction: sortOrder as 'asc' | 'desc' }}
         />
     );

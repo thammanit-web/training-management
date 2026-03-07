@@ -9,6 +9,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Card } from "@/components/ui/Card";
 import { TrainingRecordDetailsModal } from "./TrainingRecordDetailsModal";
 import { BulkTrainingRecordModal } from "./BulkTrainingRecordModal";
+import { ExportTrainingRecordsModal } from "./ExportTrainingRecordsModal";
 import { exportTrainingRecordsToExcel } from "@/lib/exportUtils";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -21,6 +22,8 @@ interface TrainingRecordsClientProps {
     limit: number;
     currentSearch: string;
     currentResult: string;
+    currentStartDate: string;
+    currentEndDate: string;
     currentSort: { key: string; direction: 'asc' | 'desc' };
 }
 
@@ -33,6 +36,8 @@ export default function TrainingRecordsClient({
     limit,
     currentSearch,
     currentResult,
+    currentStartDate,
+    currentEndDate,
     currentSort
 }: TrainingRecordsClientProps) {
     const router = useRouter();
@@ -40,6 +45,7 @@ export default function TrainingRecordsClient({
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<any>(null);
     const [selectedRecord, setSelectedRecord] = useState<any>(null);
     const [empSearchInModal, setEmpSearchInModal] = useState("");
@@ -61,7 +67,12 @@ export default function TrainingRecordsClient({
     // Update URL when filters change
     const updateFilters = (updates: Record<string, string>) => {
         const params = new URLSearchParams(searchParams.toString());
-        if (!updates.page && (updates.search !== undefined || updates.result !== undefined)) {
+        if (!updates.page && (
+            updates.search !== undefined ||
+            updates.result !== undefined ||
+            updates.startDate !== undefined ||
+            updates.endDate !== undefined
+        )) {
             params.set('page', '1');
         }
         Object.entries(updates).forEach(([key, value]) => {
@@ -113,23 +124,8 @@ export default function TrainingRecordsClient({
         }
     };
 
-    const handleExport = async () => {
-        try {
-            const params = new URLSearchParams({
-                limit: 'all',
-                search: currentSearch,
-                result: currentResult
-            });
-            const res = await fetch(`/api/training-records?${params.toString()}`);
-            if (res.ok) {
-                const { data } = await res.json();
-                exportTrainingRecordsToExcel(data);
-            } else {
-                alert("ไม่สามารถดึงข้อมูลสำหรับ Export ได้");
-            }
-        } catch (error) {
-            console.error("Export error", error);
-        }
+    const handleExport = () => {
+        setIsExportModalOpen(true);
     };
 
     const handleDelete = async (id: number) => {
@@ -201,9 +197,17 @@ export default function TrainingRecordsClient({
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl shadow-sm border border-secondary text-slate-800">
-                <div className="md:col-span-2">
-                    <Input placeholder="ค้นหาชื่อพนักงาน หรือหลักสูตร..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 bg-white p-4 rounded-xl shadow-sm border border-secondary text-slate-800">
+                <div className="md:col-span-1">
+                    <Input placeholder="ค้นหา..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-accent whitespace-nowrap">จาก:</span>
+                    <Input type="date" value={currentStartDate} onChange={(e) => updateFilters({ startDate: e.target.value })} className="h-9 py-1 text-sm" />
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-accent whitespace-nowrap">ถึง:</span>
+                    <Input type="date" value={currentEndDate} onChange={(e) => updateFilters({ endDate: e.target.value })} className="h-9 py-1 text-sm" />
                 </div>
                 <Select
                     value={currentResult}
@@ -290,6 +294,7 @@ export default function TrainingRecordsClient({
 
             <TrainingRecordDetailsModal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} record={selectedRecord} />
             <BulkTrainingRecordModal isOpen={isBulkModalOpen} onClose={() => setIsBulkModalOpen(false)} employees={employees} courses={courses} onSuccess={() => router.refresh()} />
+            <ExportTrainingRecordsModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} employees={employees} courses={courses} />
         </div>
     );
 }
