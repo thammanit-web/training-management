@@ -50,8 +50,8 @@ function testAuthLogic() {
  */
 function testFilterLogic() {
     console.log('\n--- 3. Testing Filter Construction Logic ---');
-    const searchTerm = 'John Doe';
-    const deptFilter = 'IT';
+    const searchTerm: string = 'John Doe';
+    const deptFilter: string = 'IT';
 
     const where: Prisma.EmployeeWhereInput = {
         AND: [
@@ -63,11 +63,12 @@ function testFilterLogic() {
                 ]
             } : {},
             deptFilter !== 'All' ? { department: deptFilter } : {},
-        ]
+        ] as Prisma.EmployeeWhereInput[]
     };
 
-    const hasSearch = where.AND?.[0]?.OR !== undefined;
-    const hasDept = where.AND?.[1]?.department !== undefined;
+    const andArray = Array.isArray(where.AND) ? where.AND as any[] : [where.AND] as any[];
+    const hasSearch = andArray[0]?.OR !== undefined;
+    const hasDept = andArray[1]?.department !== undefined;
 
     console.log(`[${hasSearch ? 'PASS' : 'FAIL'}] Search filter constructed correctly.`);
     console.log(`[${hasDept ? 'PASS' : 'FAIL'}] Department filter constructed correctly.`);
