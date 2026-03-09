@@ -179,48 +179,14 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
-exports.Prisma.UserOrderByRelevanceFieldEnum = {
-  username: 'username',
-  password: 'password',
-  role: 'role'
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
 };
 
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
-};
-
-exports.Prisma.EmployeeOrderByRelevanceFieldEnum = {
-  employee_code: 'employee_code',
-  employee_name_th: 'employee_name_th',
-  employee_name_en: 'employee_name_en',
-  gender: 'gender',
-  position: 'position',
-  department: 'department',
-  work_location: 'work_location',
-  supervisor_name: 'supervisor_name',
-  status: 'status'
-};
-
-exports.Prisma.CourseDescriptionOrderByRelevanceFieldEnum = {
-  description: 'description'
-};
-
-exports.Prisma.CourseOrderByRelevanceFieldEnum = {
-  course_code: 'course_code',
-  course_name: 'course_name',
-  course_category: 'course_category',
-  training_type: 'training_type',
-  organizing_agency: 'organizing_agency'
-};
-
-exports.Prisma.TrainingRecordOrderByRelevanceFieldEnum = {
-  training_result: 'training_result',
-  trainer_name: 'trainer_name',
-  location: 'location',
-  attachment: 'attachment',
-  note: 'note',
-  created_by: 'created_by'
 };
 
 

@@ -275,7 +275,9 @@ export default function TrainingRecordsClient({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Input placeholder="ค้นพนักงาน..." value={empSearchInModal} onChange={e => setEmpSearchInModal(e.target.value)} />
-                            <Select label="พนักงาน" name="employee_id" value={formData.employee_id} onChange={e => setFormData({ ...formData, employee_id: e.target.value })} options={[{ label: "เลือก", value: "" }, ...employees.filter(e => e.employee_name_th.includes(empSearchInModal)).map(e => ({ label: e.employee_name_th, value: e.id.toString() }))]} />
+                            <Select label="พนักงาน" name="employee_id" value={formData.employee_id} onChange={e => setFormData({ ...formData, employee_id: e.target.value })} options={[{ label: "เลือก", value: "" }, ...employees
+                                .filter(e => e.employee_name_th.includes(empSearchInModal) || e.employee_code.includes(empSearchInModal))
+                                .map(e => ({ label: `${e.employee_code} - ${e.employee_name_th}`, value: e.id.toString() }))]} />
                         </div>
                         <Select label="หลักสูตร" name="course_id" value={formData.course_id} onChange={e => setFormData({ ...formData, course_id: e.target.value })} options={[{ label: "เลือก", value: "" }, ...courses.map(c => ({ label: c.course_name, value: c.id.toString() }))]} />
                         <Input label="วันที่" name="training_date" type="date" value={formData.training_date} onChange={e => setFormData({ ...formData, training_date: e.target.value })} />
@@ -284,6 +286,17 @@ export default function TrainingRecordsClient({
                         <Input label="ผู้สอน" name="trainer_name" value={formData.trainer_name} onChange={e => setFormData({ ...formData, trainer_name: e.target.value })} />
                         <Input label="สถานที่" name="location" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
                         <Input label="หมดอายุ" name="expire_date" type="date" value={formData.expire_date} onChange={e => setFormData({ ...formData, expire_date: e.target.value })} />
+                        <div className="col-span-2 space-y-1">
+                            <label className="block text-sm font-medium text-gray-700">เอกสารแนบ</label>
+                            <input
+                                type="file"
+                                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-primary hover:file:bg-indigo-100"
+                            />
+                            {editingRecord?.attachment && !file && (
+                                <p className="text-xs text-accent mt-1 italic">มีไฟล์แนบเดิมอยู่แล้ว (เลือกใหม่เพื่อเปลี่ยน)</p>
+                            )}
+                        </div>
                     </div>
                     <div className="flex justify-end gap-2 pt-4 border-t">
                         <Button variant="secondary" onClick={() => setIsModalOpen(false)}>ยกเลิก</Button>

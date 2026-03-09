@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { withAuth } from '@/lib/auth';
-import { writeFile, unlink } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { uploadFile, deleteFile } from '@/lib/storage';
 
 export const GET = withAuth(async (
     req: Request,
@@ -59,23 +57,21 @@ export const PUT = withAuth(async (
         const file = formData.get('attachment') as File | null;
 
         if (file && file.size > 0) {
-            const bytes = await file.arrayBuffer();
-            const buffer = Buffer.from(bytes);
+            try {
+                // Upload new file
+                const newUrl = await uploadFile(file, file.name);
+                updateData.attachment = newUrl;
 
-            const uploadDir = join(process.cwd(), 'public/uploads');
-            const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
-            const filePath = join(uploadDir, fileName);
-            await writeFile(filePath, buffer);
-
-            updateData.attachment = `/uploads/${fileName}`;
-
-            // Attempt to delete old attachment
-            const oldRecord = await prisma.trainingRecord.findUnique({ where: { id: targetId }, select: { attachment: true } });
-            if (oldRecord?.attachment) {
-                const oldPath = join(process.cwd(), 'public', oldRecord.attachment);
-                if (existsSync(oldPath)) {
-                    await unlink(oldPath).catch(err => console.error("Error unlinking old attachment", err));
+                // Attempt to delete old attachment from Supabase
+                const oldRecord = await prisma.trainingRecord.findUnique({
+                    where: { id: targetId },
+                    select: { attachment: true }
+                });
+                if (oldRecord?.attachment) {
+                    await deleteFile(oldRecord.attachment);
                 }
+            } catch (err) {
+                console.error('File update failed:', err);
             }
         }
 
@@ -100,12 +96,12 @@ export const DELETE = withAuth(async (
         const targetId = parseInt(p.id);
 
         // Optional: Delete physical file attachment before deleting db map
-        const oldRecord = await prisma.trainingRecord.findUnique({ where: { id: targetId }, select: { attachment: true } });
+        const oldRecord = await prisma.trainingRecord.findUnique({
+            where: { id: targetId },
+            select: { attachment: true }
+        });
         if (oldRecord?.attachment) {
-            const oldPath = join(process.cwd(), 'public', oldRecord.attachment);
-            if (existsSync(oldPath)) {
-                await unlink(oldPath).catch(err => console.error("Error unlinking old attachment", err));
-            }
+            await deleteFile(oldRecord.attachment);
         }
 
         await prisma.trainingRecord.delete({ where: { id: targetId } });

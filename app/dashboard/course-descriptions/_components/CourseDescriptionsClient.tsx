@@ -145,7 +145,7 @@ export default function CourseDescriptionsClient({
                                         <div className="text-sm font-bold text-primary">{desc.course?.course_name}</div>
                                         <div className="text-xs text-accent">{desc.course?.course_code}</div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600 line-clamp-2" title={desc.description}>{desc.description}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-600 whitespace-pre-wrap break-word" title={desc.description}>{desc.description}</td>
                                     <td className="px-6 py-4 text-right flex justify-end gap-1">
                                         <Button size="sm" variant="ghost" onClick={() => handleOpenModal(desc)}>แก้ไข</Button>
                                         <Button size="sm" variant="ghost" className="text-red-500" onClick={() => handleDelete(desc.id)}>ลบ</Button>

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { withAuth } from '@/lib/auth';
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
-import { mkdirSync, existsSync } from 'fs';
+import { uploadFile } from '@/lib/storage';
 
 export const GET = withAuth(async (req: Request) => {
     try {
@@ -89,14 +87,12 @@ export const POST = withAuth(async (req: Request) => {
 
         let attachmentPath: string | null = null;
         if (file && file.size > 0) {
-            const bytes = await file.arrayBuffer();
-            const buffer = Buffer.from(bytes);
-            const uploadDir = join(process.cwd(), 'public/uploads');
-            if (!existsSync(uploadDir)) mkdirSync(uploadDir, { recursive: true });
-            const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
-            const filePath = join(uploadDir, fileName);
-            await writeFile(filePath, buffer);
-            attachmentPath = `/uploads/${fileName}`;
+            try {
+                attachmentPath = await uploadFile(file, file.name);
+            } catch (err) {
+                console.error('File upload failed:', err);
+                // Optionally handle error, but for now we continue without attachment if it fails
+            }
         }
 
         const employeeIds = formData.getAll('employee_id') as string[];

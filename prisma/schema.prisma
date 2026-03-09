@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 model User {
@@ -52,7 +52,6 @@ model Course {
   organizing_agency    String?
   certificate_required Boolean             @default(false)
   descriptions         CourseDescription[]
-  
 
   training_records TrainingRecord[]
 
