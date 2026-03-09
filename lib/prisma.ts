@@ -1,7 +1,15 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import "dotenv/config";
 
 // ─── Adapter (passes pool config, not pool instance) ────────
+
+// Log only once when the file is loaded
+if (process.env.NODE_ENV === "development" || process.env.NEXT_PHASE === "phase-production-build") {
+  console.log('Database Host:', process.env.DATABASE_HOST || "localhost");
+  console.log('Database User:', process.env.DATABASE_USER);
+  console.log('Database Name:', process.env.DATABASE_NAME);
+}
 
 const adapter = new PrismaMariaDb({
   host: process.env.DATABASE_HOST || "localhost",
@@ -9,7 +17,9 @@ const adapter = new PrismaMariaDb({
   user: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  connectionLimit: 10,
+  connectionLimit: 50,
+  connectTimeout: 30000,
+  acquireTimeout: 30000,
 });
 
 // ─── Client Singleton ───────────────────────────────────────
