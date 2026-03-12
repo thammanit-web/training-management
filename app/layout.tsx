@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 // 1. เปลี่ยนจาก next/font/google เป็น next/font/local
-import localFont from "next/font/local"; 
+import localFont from "next/font/local";
 import "./globals.css";
 
 // 2. กำหนดค่า localFont แทนที่ของเดิม
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body
-        className={`${baiJamjuree.className} font-sans antialiased`}
+        className={`${baiJamjuree.variable} ${baiJamjuree.className} font-sans antialiased`}
       >
         {children}
       </body>

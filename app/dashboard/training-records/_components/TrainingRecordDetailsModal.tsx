@@ -4,18 +4,24 @@ import React from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { TrainingPDFDocument } from './TrainingPDFDocument';
 
 interface TrainingRecordDetailsModalProps {
     isOpen: boolean;
     onClose: () => void;
     record: any;
+    onViewHistory?: (employee: any) => void;
 }
 
 export const TrainingRecordDetailsModal: React.FC<TrainingRecordDetailsModalProps> = ({
     isOpen,
     onClose,
     record,
+    onViewHistory,
 }) => {
+
+
     if (!record) return null;
 
     const translateResult = (result: string) => {
@@ -36,16 +42,121 @@ export const TrainingRecordDetailsModal: React.FC<TrainingRecordDetailsModalProp
             title="รายละเอียดการอบรม"
             maxWidth="2xl"
         >
-            <div className="space-y-8">
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @media print {
+                    @page {
+                        size: A4;
+                        margin: 15mm;
+                    }
+                    /* Hide everything else */
+                    body * {
+                        visibility: hidden;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    /* Show and expand the modal content */
+                    #training-detail-content, #training-detail-content * {
+                        visibility: visible;
+                    }
+                    #training-detail-content {
+                        position: absolute !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        width: 100% !important;
+                        height: auto !important;
+                        background: white !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        font-family: var(--font-bai-jamjuree), sans-serif !important;
+                        color: #1a1a1a !important;
+                    }
+                    /* Ensure headers and text stand out */
+                    h1, h2, h3, h4, h5, p, span, div {
+                        font-family: var(--font-bai-jamjuree), sans-serif !important;
+                    }
+                    /* Avoid breaking content between pages */
+                    .avoid-break {
+                        page-break-inside: avoid !important;
+                    }
+                    /* Custom print adjustments for layout */
+                    .print-header {
+                        display: block !important;
+                        margin-bottom: 2rem !important;
+                        border-bottom: 2px solid #4f46e5 !important;
+                        padding-bottom: 1rem !important;
+                    }
+                    /* Force grid layouts to remain */
+                    .grid {
+                        display: grid !important;
+                    }
+                    .md\\:grid-cols-2 {
+                        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                    }
+                    /* Re-enable display of elements that were hidden by tailwind flex/grid classes */
+                    .flex { display: flex !important; }
+                    .justify-between { justify-content: space-between !important; }
+                    .items-center { align-items: center !important; }
+                    .gap-4 { gap: 1rem !important; }
+                    .gap-8 { gap: 2rem !important; }
+                    
+                    /* Background and colors */
+                    .bg-gray-50 { background-color: #f9fafb !important; }
+                    .bg-indigo-50 { background-color: #eef2ff !important; }
+                    .bg-indigo-100 { background-color: #e0e7ff !important; }
+                    .text-indigo-600 { color: #4f46e5 !important; }
+                    .text-indigo-700 { color: #4338ca !important; }
+                    .text-gray-900 { color: #111827 !important; }
+                    .text-gray-700 { color: #374151 !important; }
+                    .text-gray-400 { color: #9ca3af !important; }
+                    
+                    /* Hide modal buttons and close icons */
+                    .no-print {
+                        display: none !important;
+                    }
+                    
+                    /* Remove potential scrollbars */
+                    body {
+                        overflow: visible !important;
+                    }
+                }
+                
+                /* Hide print-only elements in normal view, unless exporting */
+                .print-only {
+                    display: 'block' : 'none'};
+                }
+            `}} />
+            <div className="space-y-8 p-1" id="training-detail-content">
+                {/* Print Only Header */}
+                <div className="print-only print-header">
+                    <div className="flex justify-between items-end">
+                        <h1 className="text-2xl font-bold text-indigo-700">รายละเอียดบันทึกการอบรม</h1>
+                        <p className="text-sm text-gray-400">วันที่พิมพ์: {new Date().toLocaleDateString('th-TH')}</p>
+                    </div>
+                </div>
+
                 {/* Section 1: Employee and Status */}
-                <div className="flex items-start justify-between border-b border-gray-100 pb-6">
+                <div className="flex items-start justify-between border-b border-gray-100 pb-6 avoid-break">
                     <div className="flex items-center gap-4">
                         <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl shadow-inner">
                             {record.employee?.employee_name_th?.charAt(0) || "U"}
                         </div>
                         <div>
                             <h3 className="text-xl font-bold text-gray-900">{record.employee?.employee_name_th}</h3>
-                            <p className="text-sm text-gray-500 font-medium">รหัสพนักงาน: <span className="text-indigo-600">{record.employee?.employee_code}</span></p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm text-gray-500 font-medium">รหัสพนักงาน: <span className="text-indigo-600">{record.employee?.employee_code}</span></p>
+                                {onViewHistory && (
+                                    <button
+                                        onClick={() => {
+                                            onClose();
+                                            onViewHistory({ ...record.employee, id: record.employee_id });
+                                        }}
+                                        className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold underline underline-offset-2 ml-2 no-print"
+                                    >
+                                        ดูประวัติทั้งหมด
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                     <Badge variant={result.variant} className="text-sm py-1 px-3">
@@ -55,9 +166,9 @@ export const TrainingRecordDetailsModal: React.FC<TrainingRecordDetailsModalProp
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Section 2: Training Details */}
-                    <div className="space-y-4">
+                    <div className="space-y-4 avoid-break">
                         <div className="flex items-center gap-2 text-indigo-600 border-b border-indigo-50 pb-2">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <h4 className="font-bold uppercase tracking-wider text-xs">ข้อมูลการอบรม</h4>
@@ -80,9 +191,9 @@ export const TrainingRecordDetailsModal: React.FC<TrainingRecordDetailsModalProp
                     </div>
 
                     {/* Section 3: Course Details */}
-                    <div className="space-y-4">
+                    <div className="space-y-4 avoid-break">
                         <div className="flex items-center gap-2 text-indigo-600 border-b border-indigo-50 pb-2">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
                             <h4 className="font-bold uppercase tracking-wider text-xs">ข้อมูลหลักสูตร</h4>
@@ -107,9 +218,9 @@ export const TrainingRecordDetailsModal: React.FC<TrainingRecordDetailsModalProp
 
                 {/* Section 4: Course Full Description */}
                 {record.course?.descriptions && record.course.descriptions.length > 0 && (
-                    <div className="space-y-3 bg-indigo-50/30 rounded-xl p-6 border border-indigo-100/50">
+                    <div className="space-y-3 bg-indigo-50/30 rounded-xl p-6 border border-indigo-100/50 avoid-break">
                         <div className="flex items-center gap-2 text-indigo-700">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 text-indigo-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <h4 className="font-bold text-sm uppercase tracking-tight">รายละเอียดเนื้อหาและวัตถุประสงค์</h4>
@@ -125,7 +236,7 @@ export const TrainingRecordDetailsModal: React.FC<TrainingRecordDetailsModalProp
                 )}
 
                 {/* Section 5: Notes and Attachment */}
-                <div className="bg-gray-50 rounded-xl p-6 space-y-4">
+                <div className="bg-gray-50 rounded-xl p-6 space-y-4 avoid-break">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <h4 className="text-sm font-bold text-gray-700">หมายเหตุ</h4>
@@ -133,7 +244,7 @@ export const TrainingRecordDetailsModal: React.FC<TrainingRecordDetailsModalProp
                                 {record.note || "ไม่มีหมายเหตุ"}
                             </p>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-3 no-print">
                             <h4 className="text-sm font-bold text-gray-700">เอกสารแนบ</h4>
                             {record.attachment ? (
                                 <a
@@ -156,7 +267,17 @@ export const TrainingRecordDetailsModal: React.FC<TrainingRecordDetailsModalProp
                     </div>
                 </div>
 
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end pt-4 border-t no-print gap-3">
+                    <PDFDownloadLink
+                        document={<TrainingPDFDocument record={record} />}
+                        fileName={`Training_${record.employee?.employee_code}.pdf`}
+                    >
+                        {({ loading }) => (
+                            <Button variant="primary" disabled={loading} className="px-8 bg-indigo-600">
+                                {loading ? 'กำลังเตรียมไฟล์...' : 'ดาวน์โหลด PDF'}
+                            </Button>
+                        )}
+                    </PDFDownloadLink>
                     <Button variant="secondary" onClick={onClose} className="px-8">
                         ปิดหน้าต่าง
                     </Button>

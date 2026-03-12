@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { TrainingRecordDetailsModal } from "./TrainingRecordDetailsModal";
 import { BulkTrainingRecordModal } from "./BulkTrainingRecordModal";
 import { ExportTrainingRecordsModal } from "./ExportTrainingRecordsModal";
+import { EmployeeTrainingRecordsModal } from "../../_components/EmployeeTrainingRecordsModal";
 import { exportTrainingRecordsToExcel } from "@/lib/exportUtils";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -45,9 +46,11 @@ export default function TrainingRecordsClient({
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<any>(null);
     const [selectedRecord, setSelectedRecord] = useState<any>(null);
+    const [viewingEmployee, setViewingEmployee] = useState<any>(null);
     const [empSearchInModal, setEmpSearchInModal] = useState("");
     const [searchTerm, setSearchTerm] = useState(currentSearch);
 
@@ -239,8 +242,13 @@ export default function TrainingRecordsClient({
                                 return (
                                     <tr key={rec.id} className="hover:bg-gray-50 transition-colors group">
                                         <td className="px-6 py-4">
-                                            <div className="text-sm font-semibold">{rec.employee?.employee_name_th}</div>
-                                            <div className="text-xs text-accent">{rec.employee?.employee_code}</div>
+                                            <button
+                                                onClick={() => { setViewingEmployee({ ...rec.employee, id: rec.employee_id }); setIsHistoryModalOpen(true); }}
+                                                className="text-left hover:text-primary transition-colors group/emp"
+                                            >
+                                                <div className="text-sm font-semibold group-hover/emp:underline">{rec.employee?.employee_name_th}</div>
+                                                <div className="text-xs text-accent">{rec.employee?.employee_code}</div>
+                                            </button>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm font-medium">{rec.course?.course_name}</div>
@@ -305,7 +313,20 @@ export default function TrainingRecordsClient({
                 </form>
             </Modal>
 
-            <TrainingRecordDetailsModal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} record={selectedRecord} />
+            <TrainingRecordDetailsModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                record={selectedRecord}
+                onViewHistory={(emp) => {
+                    setViewingEmployee(emp);
+                    setIsHistoryModalOpen(true);
+                }}
+            />
+            <EmployeeTrainingRecordsModal
+                isOpen={isHistoryModalOpen}
+                onClose={() => setIsHistoryModalOpen(false)}
+                employee={viewingEmployee}
+            />
             <BulkTrainingRecordModal isOpen={isBulkModalOpen} onClose={() => setIsBulkModalOpen(false)} employees={employees} courses={courses} onSuccess={() => router.refresh()} />
             <ExportTrainingRecordsModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} employees={employees} courses={courses} />
         </div>

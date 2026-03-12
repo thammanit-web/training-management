@@ -54,7 +54,7 @@ export default async function TrainingRecordsPage({
             skip,
             take: limit,
             include: {
-                employee: { select: { employee_name_th: true, employee_name_en: true, employee_code: true } },
+                employee: { select: { id: true, employee_name_th: true, employee_name_en: true, employee_code: true } },
                 course: {
                     include: {
                         descriptions: true

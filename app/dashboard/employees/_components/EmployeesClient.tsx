@@ -7,7 +7,7 @@ import { Select } from "@/components/ui/Select";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Card } from "@/components/ui/Card";
-import { EmployeeTrainingRecordsModal } from "./EmployeeTrainingRecordsModal";
+import { EmployeeTrainingRecordsModal } from "../../_components/EmployeeTrainingRecordsModal";
 import { ExportEmployeesModal } from "./ExportEmployeesModal";
 import { exportEmployeesToExcel } from "@/lib/exportUtils";
 import { useRouter, useSearchParams } from "next/navigation";

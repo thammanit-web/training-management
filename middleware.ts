@@ -5,8 +5,19 @@ import { jwtVerify } from 'jose';
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'supersecret123');
 
 export async function middleware(request: NextRequest) {
-    const token = request.cookies.get('token')?.value;
+    let token = request.cookies.get('token')?.value;
+
+    // Fallback to query parameter (useful for PDF generation)
+    if (!token) {
+        token = request.nextUrl.searchParams.get('token') || undefined;
+    }
+
     const { pathname } = request.nextUrl;
+
+    // Bypass authentication for PDF print pages to allow Puppeteer access
+    if (pathname.includes('/print')) {
+        return NextResponse.next();
+    }
 
     // Protect dashboard routes
     if (pathname.startsWith('/dashboard')) {

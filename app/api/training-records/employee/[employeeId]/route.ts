@@ -13,11 +13,23 @@ export const GET = withAuth(async (
         const skip = (page - 1) * limit;
 
         const p = await params;
-        const employee_id = parseInt(p.employeeId);
+        const employeeIdRaw = p?.employeeId;
+
+        if (!employeeIdRaw) {
+            return NextResponse.json({ error: 'Missing employeeId parameter' }, { status: 400 });
+        }
+
+        const employee_id = parseInt(employeeIdRaw);
+
+        if (isNaN(employee_id)) {
+            return NextResponse.json({ error: 'Invalid employeeId' }, { status: 400 });
+        }
 
         const [records, total] = await Promise.all([
             prisma.trainingRecord.findMany({
-                where: { employee_id },
+                where: {
+                    employee_id: employee_id
+                },
                 skip,
                 take: limit,
                 orderBy: { training_date: 'desc' },
@@ -36,7 +48,11 @@ export const GET = withAuth(async (
                     }
                 }
             }),
-            prisma.trainingRecord.count({ where: { employee_id } }),
+            prisma.trainingRecord.count({
+                where: {
+                    employee_id: employee_id
+                }
+            }),
         ]);
 
         return NextResponse.json({ data: records, total, page, limit });
